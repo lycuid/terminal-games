@@ -1,0 +1,8 @@
+requirements (for compilation):
+  - libncurses
+  - gnu make
+  - g++
+
+quickstart:
+  run command `make` to build the game, followed by `make run` to run it.
+
