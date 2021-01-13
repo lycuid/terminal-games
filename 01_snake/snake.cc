@@ -2,15 +2,14 @@
 #include <curses.h>
 #include "snake.h"
 
-// wchar_t SNAKE_HEAD_SYM[]  = { 0x0254 };
-wchar_t SNAKE_HEAD_SYM[]  = { 0x2593, 0 };
-wchar_t SNAKE_BODY_SYM[]  = { 0x2592, 0 };
-wchar_t EMPTY_SYM[]       = { 0x0020, 0 };
-
 /*
  * Snake structure:
  * [tail.first, ........, tail.last](head)
  */
+
+wchar_t SNAKE_HEAD_SYM[]  = { 0x2593, 0 };
+wchar_t SNAKE_BODY_SYM[]  = { 0x2592, 0 };
+wchar_t EMPTY_SYM[]       = { 0x0020, 0 };
 
 bool operator==(const Coordinates& a, const Coordinates& b)
 {
@@ -31,25 +30,28 @@ void Snake::init(int length)
     (this->tail).push_back(n);
   }
   this->head = Coordinates(length + 1, 1);
-  this->previous_dead = Coordinates();
+  this->dead_trail = Coordinates();
 }
 
 void Snake::step()
 {
+  Node<Coordinates>* stack_node;
 
-  // pop from top, to reuse in leading steps.
-  Node<Coordinates>* head_node = this->just_eaten
-    ? (Node<Coordinates>*) malloc(sizeof(Coordinates)) : (this->tail).pop();
-
-  // keeping track of the lost coordinates, in order to paint blank on next render.
-  this->previous_dead = this->just_eaten ? Coordinates() : head_node->value;
-
-  // stack the previously popped block, at the bottom like a stacking a pencil.
+  if (this->just_eaten) {
+    stack_node = (Node<Coordinates>*) malloc(sizeof(Coordinates));
+    this->dead_trail = Coordinates();
+  } else {
+    // pop from top, to reuse in the following steps.
+    stack_node = (this->tail).pop();
+    // keeping track of the lost coordinates, in order to paint blank on next render.
+    this->dead_trail = stack_node->value;
+  }
+  // stack the previously popped 'Node', at the bottom like a stacking a pencil.
   // reusing the block, instead of creating/destroying.
-  head_node->value = this->head;
-  head_node->next = nullptr;
+  stack_node->value = this->head;
+  stack_node->next = nullptr;
 
-  (this->tail).push_back(head_node);
+  (this->tail).push_back(stack_node);
 
   // updating head to new coordinates with respect to 'direction_t'.
   switch (this->direction) {
@@ -62,34 +64,32 @@ void Snake::step()
 
 void Snake::draw()
 {
-  if ((this->previous_dead).y >= 0 && (this->previous_dead).x >= 0
+  if ((this->dead_trail).y >= 0 && (this->dead_trail).x >= 0
       && !this->just_eaten)
-    mvaddwstr((this->previous_dead).y, (this->previous_dead).x, EMPTY_SYM);
-
-  Coordinates snake_head = this->head;
-  Node<Coordinates>* snake_tail = (this->tail).first();
+    mvaddwstr((this->dead_trail).y, (this->dead_trail).x, EMPTY_SYM);
 
   // drawing head.
+  Coordinates snake_head = this->head;
   mvaddwstr(snake_head.y, snake_head.x, SNAKE_HEAD_SYM);
 
   // replacing last of snake body (tail.first) with empty block, which helps
   // with not clearing and redrawing the entire screen on every render.
-  mvaddwstr((snake_tail->value).y, (snake_tail->value).x, SNAKE_BODY_SYM);
-
-  // drawing the rest of the tail.
-  while ((snake_tail = snake_tail->next) != nullptr) {
-    mvaddwstr((snake_tail->value).y, (snake_tail->value).x, SNAKE_BODY_SYM);
+  for (Node<Coordinates>* snake_tail = (this->tail).first();
+      snake_tail != nullptr; snake_tail = snake_tail->next)
+  {
+    mvaddwstr((snake_tail->value).y,
+        (snake_tail->value).x, SNAKE_BODY_SYM);
   }
 }
 
-bool Snake::check_dead(int height, int width)
+bool Snake::is_dead(int height, int width)
 {
   // check self destruction.
-  Node<Coordinates>* snake_tail = (this->tail).first();
-  while (snake_tail != nullptr) {
+  for (Node<Coordinates>* snake_tail = (this->tail).first();
+      snake_tail != nullptr; snake_tail = snake_tail->next)
+  {
     if (this->head == snake_tail->value)
       return true;
-    snake_tail = snake_tail->next;
   }
 
   // check wall collision.

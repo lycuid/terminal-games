@@ -1,3 +1,6 @@
+#ifndef __SNAKE_H
+#define __SNAKE_H
+
 #include <linkedlist.h>
 
 enum direction_t { Up, Down, Left, Right };
@@ -14,23 +17,26 @@ bool operator==(const Coordinates&, const Coordinates&);
 
 class Snake
 {
-public:
-  Coordinates head;
-  LinkedList<Coordinates> tail;
-  direction_t direction;
+  public:
+    Snake();
+    Snake(direction_t);
+    ~Snake();
 
-  Coordinates previous_dead;
-  bool just_eaten;
+  public:
+    Coordinates head;
+    LinkedList<Coordinates> tail;
+    direction_t direction;
 
-public:
-  Snake();
-  Snake(direction_t);
-  ~Snake();
+    void init(int);
+    void step();
+    void draw();
+    bool eat_fruit(Coordinates*);
+    bool is_dead(int, int);
 
-  void init(int);
-  void step();
-  void draw();
-  bool eat_fruit(Coordinates*);
-  bool check_dead(int, int);
+  private:
+    Coordinates dead_trail;
+    bool just_eaten;
 };
+
+#endif
 

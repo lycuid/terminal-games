@@ -1,9 +1,9 @@
-#include <unistd.h>
-#include <math.h>
-#include <time.h>
+#include <unistd.h> // usleep().
 #include <string.h>
-#include <curses.h>
+#include <time.h>
 #include <locale.h>
+#include <math.h>
+#include <curses.h>
 
 #include "snake.h"
 
@@ -30,14 +30,12 @@ static int PADDING_DEATH_BAR = strlen(DEATH_BAR_FMT) + 2;
 static int PADDING_SCORE_BAR = strlen(SCORE_BAR_FMT) + 2;
 
 void init_window(); // initialize ncurses window.
-void ready_window(const char*);
+void reset_window(const char*);
 void game_loop();
 bool scoreboard_and_restart(WINDOW*);
 
-void refresh_fruit(Coordinates*);
 void update_extras(Snake*, Coordinates*);
 bool handle_keypress(Snake*, int);
-
 int rand_range(int, int);
 
 int main(void)
@@ -70,18 +68,19 @@ void init_window()
   // get a character at a time (whatever that means).
   cbreak();
   // enabling arrow keys.
-  keypad(stdscr, TRUE);
+  keypad(stdscr, true);
   // invisible cursor.
   curs_set(0);
   // set WINDOW_HEIGHT and WINDOW_WIDTH.
   getmaxyx(stdscr, WINDOW_HEIGHT, WINDOW_WIDTH);
+
   SCOREBOARD_HEIGHT = 7;
   SCOREBOARD_WIDTH  = strlen(SCOREBOARD_ECHO) + 2;
   SCOREBOARD_X      = (WINDOW_WIDTH - SCOREBOARD_WIDTH) / 2;
   SCOREBOARD_Y      = (WINDOW_HEIGHT - SCOREBOARD_HEIGHT) / 2;
 }
 
-void ready_window(const char* title)
+void reset_window(const char* title)
 {
   clear();
   box(stdscr, 0, 0);
@@ -95,12 +94,14 @@ int rand_range(int min, int max) { return (rand() % (max - min)) + min; }
 void game_loop()
 {
   // non blocking 'getch'.
-  nodelay(stdscr, TRUE);
+  nodelay(stdscr, true);
+
+  PLAYER_DEATHS  = 0;
+  PLAYER_SCORE   = 0;
 
   Snake snake;
   snake.init(PLAYER_SIZE);
-
-  ready_window(WINDOW_TITLE);
+  reset_window(WINDOW_TITLE);
 
   Coordinates fruit = Coordinates();
   update_extras(&snake, &fruit);
@@ -114,12 +115,12 @@ void game_loop()
       update_extras(&snake, &fruit);
     }
 
-    if (snake.check_dead(WINDOW_HEIGHT - 1, WINDOW_WIDTH - 1)) {
+    if (snake.is_dead(WINDOW_HEIGHT - 1, WINDOW_WIDTH - 1)) {
       PLAYER_DEATHS++;
 
       snake = Snake();
       snake.init(PLAYER_SIZE);
-      ready_window(WINDOW_TITLE);
+      reset_window(WINDOW_TITLE);
 
       update_extras(&snake, &fruit);
 
@@ -135,17 +136,18 @@ void game_loop()
 bool scoreboard_and_restart(WINDOW* scoreboard)
 {
   // blocking 'getch'.
-  nodelay(stdscr, FALSE);
+  nodelay(stdscr, false);
 
+  wattroff(scoreboard, A_STANDOUT);
   wclear(scoreboard);
   box(scoreboard, 0, 0);
-  mvwprintw(scoreboard, 0, (SCOREBOARD_WIDTH - 14) / 2, SCOREBOARD_TITLE);
+
+  mvwaddstr(scoreboard, 0, (SCOREBOARD_WIDTH - 14) / 2, SCOREBOARD_TITLE);
   mvwprintw(scoreboard, 2, 4, "Score: %03d", PLAYER_SCORE);
   mvwprintw(scoreboard, 3, 4, "Death: %03d", PLAYER_DEATHS);
 
   wattron(scoreboard, A_STANDOUT);
   mvwaddstr(scoreboard, 5, 1, SCOREBOARD_ECHO);
-
   wrefresh(scoreboard);
 
   int ch;
@@ -166,17 +168,16 @@ bool handle_keypress(Snake* snake, int ch)
   switch(ch) {
     case 'q': return false;
 
+    case 'w':
     case KEY_UP:    snake->direction = Up;     break;
+    case 'a':
     case KEY_LEFT:  snake->direction = Left;   break;
+    case 's':
     case KEY_DOWN:  snake->direction = Down;   break;
+    case 'd':
     case KEY_RIGHT: snake->direction = Right;  break;
 
-    case 'w': snake->direction = Up;     break;
-    case 'a': snake->direction = Left;   break;
-    case 's': snake->direction = Down;   break;
-    case 'd': snake->direction = Right;  break;
-
-    case ERR: break;
+    case ERR:
     default:  break;
   }
 
@@ -185,14 +186,11 @@ bool handle_keypress(Snake* snake, int ch)
 
 void update_extras(Snake* snake, Coordinates* fruit)
 {
-  refresh_fruit(fruit);
-  mvaddwstr(fruit->y, fruit->x, FRUIT_SYM);
-  mvprintw(0, WINDOW_WIDTH-PADDING_DEATH_BAR-PADDING_SCORE_BAR, SCORE_BAR_FMT, PLAYER_SCORE);
-}
-
-void refresh_fruit(Coordinates* fruit)
-{
+  // refreshing the fruit.
   fruit->y = rand_range(1, WINDOW_HEIGHT - 1);
   fruit->x = rand_range(1, WINDOW_WIDTH - 1);
+
+  mvaddwstr(fruit->y, fruit->x, FRUIT_SYM);
+  mvprintw(0, WINDOW_WIDTH-PADDING_DEATH_BAR-PADDING_SCORE_BAR, SCORE_BAR_FMT, PLAYER_SCORE);
 }
 

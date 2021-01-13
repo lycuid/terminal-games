@@ -1,15 +1,16 @@
-LIB=../lib
+BIN=./bin
+LIB=./lib
 GXX=g++ -Wall -I$(LIB)
 
 build: lib-build
-	$(GXX) -lncurses -o game.out game.cc *.o
+	mkdir -p $(BIN) && $(GXX) -lncurses -o $(BIN)/game game.cc *.o
 
 run: build
-	./game.out
+	$(BIN)/game
 
 lib-build:
 	$(GXX) -c snake.cc $(LIB)/*.cc
 
 clean:
-	rm -rf game.out *.o
+	rm -rf $(BIN) *.o
 

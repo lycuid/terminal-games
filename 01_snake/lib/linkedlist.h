@@ -14,18 +14,18 @@ class LinkedList
   Node<T>* _last;
   unsigned _size;
 
-public:
-  LinkedList();
-  LinkedList(Node<T>*);
-  ~LinkedList();
+  public:
+    LinkedList();
+    LinkedList(Node<T>*);
+    ~LinkedList();
 
-  Node<T>* first();
-  Node<T>* last();
-  unsigned size();
+    Node<T>* first();
+    Node<T>* last();
+    unsigned size();
 
-  void push_back(Node<T>*);
-  void push_front(Node<T>*);
-  Node<T>* pop();
+    void push_back(Node<T>*);
+    void push_front(Node<T>*);
+    Node<T>* pop();
 };
 
 
