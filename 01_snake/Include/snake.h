@@ -1,19 +1,19 @@
-#ifndef __SNAKE_H
-#define __SNAKE_H
-
 #include <linkedlist.h>
+
+#ifndef _SNAKE_H
+#define _SNAKE_H
 
 enum direction_t { Up, Down, Left, Right };
 
 struct Coordinates
 {
-  int x;
-  int y;
-  Coordinates() : x(-1), y(-1) {};
-  Coordinates(int x, int y) : x(x), y(y) {};
+  int x, y;
+  Coordinates();
+  Coordinates(int x, int y);
 };
 
 bool operator==(const Coordinates&, const Coordinates&);
+bool operator!=(const Coordinates&, const Coordinates&);
 
 class Snake
 {
@@ -29,7 +29,7 @@ class Snake
 
     void init(int);
     void step();
-    void draw();
+    void render();
     bool eat_fruit(Coordinates*);
     bool is_dead(int, int);
 

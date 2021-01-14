@@ -7,14 +7,23 @@
  * [tail.first, ........, tail.last](head)
  */
 
+Coordinates::Coordinates() : x(-1), y(-1) {};
+Coordinates::Coordinates(int x, int y) : x(x), y(y) {};
+
 wchar_t SNAKE_HEAD_SYM[]  = { 0x2593, 0 };
 wchar_t SNAKE_BODY_SYM[]  = { 0x2592, 0 };
 wchar_t EMPTY_SYM[]       = { 0x0020, 0 };
 
-bool operator==(const Coordinates& a, const Coordinates& b)
+bool operator==(const Coordinates& lhs, const Coordinates& rhs)
 {
-  return a.y == b.y && a.x == b.x;
+  return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+
+bool operator!=(const Coordinates& lhs, const Coordinates& rhs) {
+  return !(lhs == rhs);
+}
+
+Coordinates NULLCRDS = Coordinates();
 
 Snake::Snake() : direction(Right), just_eaten(false) {}
 Snake::Snake(direction_t d) : direction(d), just_eaten(false) {}
@@ -58,22 +67,22 @@ void Snake::step()
     case Left:  (this->head).x--; break;
     case Right: (this->head).x++; break;
     case Up:    (this->head).y--; break;
-    default:    (this->head).y++;
+    case Down:  (this->head).y++; break;
+    default:    break;
   }
 }
 
-void Snake::draw()
+void Snake::render()
 {
-  if ((this->dead_trail).y >= 0 && (this->dead_trail).x >= 0
-      && !this->just_eaten)
+  if (this->dead_trail != NULLCRDS && !this->just_eaten)
     mvaddwstr((this->dead_trail).y, (this->dead_trail).x, EMPTY_SYM);
 
-  // drawing head.
+  // rendering head.
   Coordinates snake_head = this->head;
   mvaddwstr(snake_head.y, snake_head.x, SNAKE_HEAD_SYM);
 
   // replacing last of snake body (tail.first) with empty block, which helps
-  // with not clearing and redrawing the entire screen on every render.
+  // with not clearing and re-rendering the entire screen on every render.
   for (Node<Coordinates>* snake_tail = (this->tail).first();
       snake_tail != nullptr; snake_tail = snake_tail->next)
   {

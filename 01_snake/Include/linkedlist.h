@@ -1,3 +1,6 @@
+#ifndef _LINKEDLIST_H
+#define _LINKEDLIST_H
+
 template <typename T>
 struct Node
 {
@@ -28,8 +31,6 @@ class LinkedList
     Node<T>* pop();
 };
 
-
-/********** Definitions. **********/
 
 template <typename T> LinkedList<T>::LinkedList() : _first(nullptr), _last(nullptr), _size(0) {}
 template <typename T> LinkedList<T>::LinkedList(Node<T>* n) : _first(n), _last(n), _size(1) {}
@@ -66,3 +67,4 @@ template <typename T> Node<T>* LinkedList<T>::pop()
   return first;
 }
 
+#endif
