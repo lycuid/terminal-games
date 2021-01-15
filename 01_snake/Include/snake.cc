@@ -51,7 +51,7 @@ void Snake::step()
     this->dead_trail = Coordinates();
   } else {
     // pop from top, to reuse in the following steps.
-    stack_node = (this->tail).pop();
+    stack_node = this->tail.pop();
     // keeping track of the lost coordinates, in order to paint blank on next render.
     this->dead_trail = stack_node->value;
   }
@@ -75,7 +75,7 @@ void Snake::step()
 void Snake::render()
 {
   if (this->dead_trail != NULLCRDS && !this->just_eaten)
-    mvaddwstr((this->dead_trail).y, (this->dead_trail).x, EMPTY_SYM);
+    mvaddwstr(this->dead_trail.y, this->dead_trail.x, EMPTY_SYM);
 
   // rendering head.
   Coordinates snake_head = this->head;
@@ -86,15 +86,15 @@ void Snake::render()
   for (Node<Coordinates>* snake_tail = (this->tail).first();
       snake_tail != nullptr; snake_tail = snake_tail->next)
   {
-    mvaddwstr((snake_tail->value).y,
-        (snake_tail->value).x, SNAKE_BODY_SYM);
+    mvaddwstr(snake_tail->value.y,
+        snake_tail->value.x, SNAKE_BODY_SYM);
   }
 }
 
 bool Snake::is_dead(int height, int width)
 {
   // check self destruction.
-  for (Node<Coordinates>* snake_tail = (this->tail).first();
+  for (Node<Coordinates>* snake_tail = this->tail.first();
       snake_tail != nullptr; snake_tail = snake_tail->next)
   {
     if (this->head == snake_tail->value)
@@ -102,8 +102,8 @@ bool Snake::is_dead(int height, int width)
   }
 
   // check wall collision.
-  return !((this->head).y > 0 && (this->head).y < height
-    && (this->head).x > 0 && (this->head).x < width);
+  return !(this->head.y > 0 && this->head.y < height
+    && this->head.x > 0 && this->head.x < width);
 }
 
 bool Snake::eat_fruit(Coordinates* fruit)
