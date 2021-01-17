@@ -2,8 +2,11 @@
 #include <math.h>
 #include <locale.h>
 #include <curses.h>
-
+#include <time.h>
 #include <pong.h>
+
+#define FRAME_RATE  120
+#define TIME_SECOND pow(10, 6)
 
 static int WINDOW_HEIGHT;
 static int WINDOW_WIDTH;
@@ -14,8 +17,12 @@ void game_loop();
 bool handle_keypress(Paddle*, int);
 void reset_window(const char*);
 
+int rand_range(int, int);
+
 int main(void)
 {
+  srand(time(0));
+
   init_window();
   game_loop();
   endwin();
@@ -49,41 +56,64 @@ void reset_window(const char* title)
   refresh();
 }
 
-
 void game_loop()
 {
   nodelay(stdscr, true);
   reset_window("| EPIC PONG GAME |");
 
-  Paddle paddle (1, WINDOW_HEIGHT - 1);
+  Paddle player (Coordinates(1, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
+  Paddle computer (Coordinates(WINDOW_WIDTH - 2, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
 
-  while (handle_keypress(&paddle, getch())) {
-    paddle.render();
+  Coordinates ball_coords = Coordinates(2,
+      rand_range(PADDLE_START_Y, PADDLE_START_Y + PADDLE_HEIGHT - 1));
+  Ball ball (ball_coords, 1, WINDOW_HEIGHT - 1);
+
+  while (handle_keypress(&player, getch())) {
+    // divider line.
     mvvline(1, WINDOW_WIDTH / 2, '|', WINDOW_HEIGHT - 2);
-    usleep(1 * pow(10, 4));
+
+    computer.render();
+    player.render();
+
+    ball.step();
+    ball.render();
+
+    if (ball.wall_collision(&player, &computer))
+      break;
+
+    usleep(TIME_SECOND / FRAME_RATE);
   }
 }
 
-bool handle_keypress(Paddle* paddle, int ch)
+bool handle_keypress(Paddle* player, int ch)
 {
   switch (ch) {
     case 'q': return false;
 
+    case 'a':
+    case KEY_LEFT:
     case 'w':
     case KEY_UP:
-      paddle->direction = Backward;
-      paddle->step();
+      player->direction = Backward;
+      player->step();
       break;
 
+    case 'd':
+    case KEY_RIGHT:
     case 's':
     case KEY_DOWN:
-      paddle->direction = Forward;
-      paddle->step();
+      player->direction = Forward;
+      player->step();
       break;
 
     case ERR:
     default: break;
   }
   return true;
+}
+
+int rand_range(int min, int max)
+{
+  return (rand() % (min + max)) + min;
 }
 
