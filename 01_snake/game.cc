@@ -7,11 +7,11 @@
 #include <curses.h>
 #include <snake.h>
 
-static const  char* WINDOW_TITLE = "| EPIC SNAKE GAME |";
+static const  char* WINDOW_TITLE = "( EPIC SNAKE GAME )";
 static        int   WINDOW_HEIGHT;
 static        int   WINDOW_WIDTH;
 
-static const  char* SCOREBOARD_TITLE  = "| SCOREBOARD |";
+static const  char* SCOREBOARD_TITLE  = "( SCOREBOARD )";
 static const  char* SCOREBOARD_ECHO   = "  press 'q' to quit or 'r' to restart...  ";
 static        int SCOREBOARD_HEIGHT;
 static        int SCOREBOARD_WIDTH;
@@ -23,8 +23,8 @@ static int PLAYER_SCORE   = 0;
 static int PLAYER_SIZE    = 5;
 
 static wchar_t FRUIT_SYM[]        = { 0x2588, 0 };
-static const char* DEATH_BAR_FMT  = "| Death: %03d |";
-static const char* SCORE_BAR_FMT  = "| Score: %03d |";
+static const char* DEATH_BAR_FMT  = "( Death: %03d )";
+static const char* SCORE_BAR_FMT  = "( Score: %03d )";
 
 static int PADDING_DEATH_BAR = strlen(DEATH_BAR_FMT) + 2;
 static int PADDING_SCORE_BAR = strlen(SCORE_BAR_FMT) + 2;
