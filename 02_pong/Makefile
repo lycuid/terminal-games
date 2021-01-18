@@ -1,5 +1,5 @@
 BIN=./bin
-INCLUDE=./Include
+INCLUDE=./include
 GXX=g++ -Wall -I$(INCLUDE)
 
 build: includes.o

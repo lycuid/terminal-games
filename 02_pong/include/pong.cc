@@ -19,6 +19,7 @@ bool operator!=(const Coordinates& lhs, const Coordinates& rhs)
 
 Coordinates nullcrds = Coordinates();
 
+Paddle::Paddle() {}
 Paddle::Paddle(Coordinates top, int l, int u)
   : direction(Backward), top(top), lower_bound(l), upper_bound(u) {}
 
@@ -43,6 +44,7 @@ void Paddle::step()
     : MIN(this->upper_bound - this->height, this->top.y + 1);
 }
 
+Ball::Ball() {}
 Ball::Ball(int u, int l)
   : point(Coordinates(2, 1)), upper_bound(u), lower_bound(l) {}
 Ball::Ball(Coordinates point, int u, int l)
@@ -72,7 +74,7 @@ void Ball::render() {
   mvaddwstr(this->point.y, this->point.x, BALL_SYM);
 }
 
-bool Ball::wall_collision(Paddle* player, Paddle* computer) {
+int Ball::wall_collision(Paddle* player, Paddle* computer) {
   // not using 'if/else' here as to solve the corner problem.
   // maximum two of these conditions can be true at a time.
 
@@ -104,21 +106,21 @@ bool Ball::wall_collision(Paddle* player, Paddle* computer) {
         case SW: this->direction = SE; break;
         default: break;
       }
-    } else return true;
+    } else return -2;
   }
 
   // handle computer paddle.
   if (this->point.x == (computer->top.x - 1)) {
-    // if (this->point.y >= computer->top.y
-    //   && this->point.y <= (computer->top.y + computer->height))
-    // {
+    if (this->point.y >= computer->top.y
+      && this->point.y <= (computer->top.y + computer->height))
+    {
       switch (this->direction) {
         case NE: this->direction = NW; break;
         case SE: this->direction = SW; break;
         default: break;
       }
-    // } else return true;
+    } else return 2;
   }
 
-  return false;
+  return 0;
 }

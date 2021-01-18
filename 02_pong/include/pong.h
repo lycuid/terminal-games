@@ -23,10 +23,12 @@ bool operator!=(const Coordinates&, const Coordinates&);
 class Paddle
 {
   public:
+    int score = 0;
     int height = PADDLE_HEIGHT;
     bi_direction_t direction;
 
   public:
+    Paddle();
     Paddle(Coordinates, int, int);
 
     void step();
@@ -39,17 +41,19 @@ class Paddle
 class Ball
 {
   int replicate_frames        = 0;
-  int max_replicate_frames    = 6;
+  int max_replicate_frames    = 5;
   diag_direction_t direction  = SE;
 
-  Coordinates point, dead_trail;
-  int upper_bound, lower_bound;
+  public:
+    Coordinates point, dead_trail;
+    int upper_bound, lower_bound;
 
   public:
+    Ball();
     Ball(int, int);
     Ball(Coordinates, int, int);
 
-    bool wall_collision(Paddle*, Paddle*);
+    int wall_collision(Paddle*, Paddle*);
     void step();
     void render();
 };
