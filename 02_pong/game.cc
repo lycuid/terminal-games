@@ -6,7 +6,7 @@
 #include <curses.h>
 #include <pong.h>
 
-#define FRAME_RATE  120
+#define FRAME_RATE  300
 #define TIME_SECOND pow(10, 6)
 
 static const char* WINDOW_TITLE = "( EPIC PONG GAME )";
@@ -20,8 +20,9 @@ static        int SCOREBOARD_WIDTH;
 static        int SCOREBOARD_Y;
 static        int SCOREBOARD_X;
 
-static int P1_SCORE = 0;
-static int P2_SCORE = 0;
+static int P1_SCORE                 = 0;
+static int P2_SCORE                 = 0;
+static int P2_MAX_REPLICATE_FRAMES  = 20;
 
 void init_window();
 void game_loop();
@@ -39,7 +40,7 @@ int main(void)
   init_window();
 
   WINDOW* scoreboard = newwin(SCOREBOARD_HEIGHT, SCOREBOARD_WIDTH, SCOREBOARD_Y, SCOREBOARD_X);
-  for (;;) {
+  while (1) {
     game_loop();
     if (!scoreboard_and_restart(scoreboard))
       break;
@@ -93,6 +94,7 @@ void reset_players(Paddle* player, Paddle* computer, Ball* ball)
   *player = Paddle (Coordinates(1, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
   *computer = Paddle(Coordinates(WINDOW_WIDTH - 2, PADDLE_START_Y),
       1, WINDOW_HEIGHT - 1);
+  computer->max_replicate_frames = P2_MAX_REPLICATE_FRAMES;
 
   Coordinates ball_coords = Coordinates(2,
       rand_range(PADDLE_START_Y, PADDLE_START_Y + PADDLE_HEIGHT - 1));
@@ -115,10 +117,16 @@ void game_loop()
     // divider line.
     mvvline(1, WINDOW_WIDTH / 2, '|', WINDOW_HEIGHT - 2);
 
-    computer.render();
-    player.render();
+    // computer movement ai (naive).
+    computer.direction = ball.point.y >= (computer.top.y + (computer.height / 2))
+      ? Forward : Backward;
 
+
+    computer.step();
     ball.step();
+
+    player.render();
+    computer.render();
     ball.render();
 
     if ((score = ball.wall_collision(&player, &computer)) != 0) {

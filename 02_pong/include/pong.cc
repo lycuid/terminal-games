@@ -39,6 +39,12 @@ void Paddle::render()
 
 void Paddle::step()
 {
+  if (this->replicate_frames < this->max_replicate_frames) {
+    this->replicate_frames++;
+    return;
+  }
+
+  this->replicate_frames  = 0;
   this->top.y = this->direction == Backward
     ? MAX(this->lower_bound, this->top.y - 1)
     : MIN(this->upper_bound - this->height, this->top.y + 1);
