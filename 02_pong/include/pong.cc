@@ -39,12 +39,10 @@ void Paddle::render()
 
 void Paddle::step()
 {
-  if (this->replicate_frames < this->max_replicate_frames) {
-    this->replicate_frames++;
+  if (this->replicate_frames++ < this->max_replicate_frames)
     return;
-  }
-
   this->replicate_frames  = 0;
+
   this->top.y = this->direction == Backward
     ? MAX(this->lower_bound, this->top.y - 1)
     : MIN(this->upper_bound - this->height, this->top.y + 1);
@@ -58,12 +56,10 @@ Ball::Ball(Coordinates point, int u, int l)
 
 void Ball::step()
 {
-  if (this->replicate_frames < this->max_replicate_frames) {
-    this->replicate_frames++;
+  if (this->replicate_frames++ < this->max_replicate_frames)
     return;
-  }
-
   this->replicate_frames  = 0;
+
   this->dead_trail        = this->point;
   switch (this->direction) {
     case NE: this->point.x++; this->point.y--; break;
