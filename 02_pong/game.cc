@@ -36,18 +36,14 @@ bool scoreboard_and_restart(WINDOW*);
 int main(void)
 {
   srand(time(0));
-
   init_window();
-
   WINDOW* scoreboard = newwin(SCOREBOARD_HEIGHT, SCOREBOARD_WIDTH, SCOREBOARD_Y, SCOREBOARD_X);
   while (1) {
     game_loop();
     if (!scoreboard_and_restart(scoreboard))
       break;
   }
-
   endwin();
-
   return 0;
 }
 
@@ -148,18 +144,20 @@ bool handle_keypress(Paddle* player, int ch)
     case 'a':
     case KEY_LEFT:
     case 'w':
-    case KEY_UP:
+    case KEY_UP: {
       player->direction = Backward;
       player->step();
       break;
+    }
 
     case 'd':
     case KEY_RIGHT:
     case 's':
-    case KEY_DOWN:
+    case KEY_DOWN: {
       player->direction = Forward;
       player->step();
       break;
+    }
 
     case ERR:
     default: break;

@@ -45,7 +45,7 @@ int main(void)
   init_window();
 
   WINDOW* scoreboard = newwin(SCOREBOARD_HEIGHT, SCOREBOARD_WIDTH, SCOREBOARD_Y, SCOREBOARD_X);
-  for (;;) {
+  while (1) {
     game_loop();
     if (!scoreboard_and_restart(scoreboard))
       break;
@@ -169,13 +169,13 @@ bool handle_keypress(Snake* snake, int ch)
     case 'q': return false;
 
     case 'w':
-    case KEY_UP:    snake->direction = Up;     break;
+    case KEY_UP: { snake->direction = Up; break; }
     case 'a':
-    case KEY_LEFT:  snake->direction = Left;   break;
+    case KEY_LEFT: { snake->direction = Left; break; }
     case 's':
-    case KEY_DOWN:  snake->direction = Down;   break;
+    case KEY_DOWN: { snake->direction = Down; break; }
     case 'd':
-    case KEY_RIGHT: snake->direction = Right;  break;
+    case KEY_RIGHT: { snake->direction = Right; break; }
 
     case ERR:
     default:  break;
