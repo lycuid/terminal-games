@@ -1,47 +1,47 @@
-#include <unistd.h>
-#include <math.h>
-#include <locale.h>
-#include <time.h>
-#include <string.h>
+#include <clocale>
+#include <cmath>
+#include <cstring>
+#include <ctime>
 #include <curses.h>
 #include <pong.h>
+#include <unistd.h>
 
 #define FRAME_RATE  300
 #define TIME_SECOND pow(10, 6)
 
-static const char* WINDOW_TITLE = "( EPIC PONG GAME )";
-static int WINDOW_HEIGHT;
-static int WINDOW_WIDTH;
+static const char *WINDOW_TITLE = "( EPIC PONG GAME )";
+static int         WINDOW_HEIGHT;
+static int         WINDOW_WIDTH;
 
-static const  char* SCOREBOARD_TITLE  = "( SCOREBOARD )";
-static const  char* SCOREBOARD_ECHO   = "  press 'q' to quit or 'r' to restart...  ";
-static        int SCOREBOARD_HEIGHT;
-static        int SCOREBOARD_WIDTH;
-static        int SCOREBOARD_Y;
-static        int SCOREBOARD_X;
+static const char *SCOREBOARD_TITLE = "( SCOREBOARD )";
+static const char *SCOREBOARD_ECHO  = "  press 'q' to quit or 'r' to restart...  ";
+static int         SCOREBOARD_HEIGHT;
+static int         SCOREBOARD_WIDTH;
+static int         SCOREBOARD_Y;
+static int         SCOREBOARD_X;
 
-static int P1_SCORE                 = 0;
-static int P2_SCORE                 = 0;
-static int P2_MAX_REPLICATE_FRAMES  = 20;
+static int P1_SCORE                = 0;
+static int P2_SCORE                = 0;
+static int P2_MAX_REPLICATE_FRAMES = 20;
 
 void init_window();
 void game_loop();
 
-bool handle_keypress(Paddle*, int);
+bool handle_keypress(Paddle *, int);
 void reset_window();
-void reset_players(Paddle*, Paddle*, Ball*);
-int rand_range(int, int);
-bool scoreboard_and_restart(WINDOW*);
+void reset_players(Paddle *, Paddle *, Ball *);
+int  rand_range(int, int);
+bool scoreboard_and_restart(WINDOW *);
 
 int main(void)
 {
   srand(time(0));
   init_window();
-  WINDOW* scoreboard = newwin(SCOREBOARD_HEIGHT, SCOREBOARD_WIDTH, SCOREBOARD_Y, SCOREBOARD_X);
+  WINDOW *scoreboard =
+      newwin(SCOREBOARD_HEIGHT, SCOREBOARD_WIDTH, SCOREBOARD_Y, SCOREBOARD_X);
   while (1) {
     game_loop();
-    if (!scoreboard_and_restart(scoreboard))
-      break;
+    if (!scoreboard_and_restart(scoreboard)) break;
   }
   endwin();
   return 0;
@@ -85,15 +85,14 @@ void reset_window()
   refresh();
 }
 
-void reset_players(Paddle* player, Paddle* computer, Ball* ball)
+void reset_players(Paddle *player, Paddle *computer, Ball *ball)
 {
-  *player = Paddle (Coordinates(1, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
-  *computer = Paddle(Coordinates(WINDOW_WIDTH - 2, PADDLE_START_Y),
-      1, WINDOW_HEIGHT - 1);
+  *player   = Paddle(Coordinates(1, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
+  *computer = Paddle(Coordinates(WINDOW_WIDTH - 2, PADDLE_START_Y), 1, WINDOW_HEIGHT - 1);
   computer->max_replicate_frames = P2_MAX_REPLICATE_FRAMES;
 
-  Coordinates ball_coords = Coordinates(2,
-      rand_range(PADDLE_START_Y, PADDLE_START_Y + PADDLE_HEIGHT - 1));
+  Coordinates ball_coords =
+      Coordinates(2, rand_range(PADDLE_START_Y, PADDLE_START_Y + PADDLE_HEIGHT - 1));
   *ball = Ball(ball_coords, 1, WINDOW_HEIGHT - 1);
 }
 
@@ -102,7 +101,7 @@ void game_loop()
   nodelay(stdscr, true);
 
   Paddle player, computer;
-  Ball ball;
+  Ball   ball;
 
   reset_window();
   reset_players(&player, &computer, &ball);
@@ -114,9 +113,8 @@ void game_loop()
     mvvline(1, WINDOW_WIDTH / 2, '|', WINDOW_HEIGHT - 2);
 
     // computer movement ai (naive).
-    computer.direction = ball.point.y >= (computer.top.y + (computer.height / 2))
-      ? Forward : Backward;
-
+    computer.direction =
+        ball.point.y >= (computer.top.y + (computer.height / 2)) ? Forward : Backward;
 
     computer.step();
     ball.step();
@@ -136,36 +134,36 @@ void game_loop()
   }
 }
 
-bool handle_keypress(Paddle* player, int ch)
+bool handle_keypress(Paddle *player, int ch)
 {
   switch (ch) {
-    case 'q': return false;
+  case 'q': return false;
 
-    case 'a':
-    case KEY_LEFT:
-    case 'w':
-    case KEY_UP: {
-      player->direction = Backward;
-      player->step();
-      break;
-    }
+  case 'a':
+  case KEY_LEFT:
+  case 'w':
+  case KEY_UP: {
+    player->direction = Backward;
+    player->step();
+    break;
+  }
 
-    case 'd':
-    case KEY_RIGHT:
-    case 's':
-    case KEY_DOWN: {
-      player->direction = Forward;
-      player->step();
-      break;
-    }
+  case 'd':
+  case KEY_RIGHT:
+  case 's':
+  case KEY_DOWN: {
+    player->direction = Forward;
+    player->step();
+    break;
+  }
 
-    case ERR:
-    default: break;
+  case ERR:
+  default: break;
   }
   return true;
 }
 
-bool scoreboard_and_restart(WINDOW* scoreboard)
+bool scoreboard_and_restart(WINDOW *scoreboard)
 {
   // blocking 'getch'.
   nodelay(stdscr, false);
@@ -185,9 +183,9 @@ bool scoreboard_and_restart(WINDOW* scoreboard)
   int ch;
   while ((ch = getch()) != ERR) {
     switch (ch) {
-      case 'r': return true;
-      case 'q': return false;
-      default:  break;
+    case 'r': return true;
+    case 'q': return false;
+    default: break;
     }
   }
 
@@ -195,8 +193,4 @@ bool scoreboard_and_restart(WINDOW* scoreboard)
   return false;
 }
 
-int rand_range(int min, int max)
-{
-  return (rand() % (min + max)) + min;
-}
-
+int rand_range(int min, int max) { return (rand() % (min + max)) + min; }
