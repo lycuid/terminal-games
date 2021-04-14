@@ -11,9 +11,8 @@
 Coordinates::Coordinates() : x(-1), y(-1){};
 Coordinates::Coordinates(int x, int y) : x(x), y(y){};
 
-wchar_t SNAKE_HEAD_SYM[] = {0x2593, 0};
-wchar_t SNAKE_BODY_SYM[] = {0x2592, 0};
-wchar_t EMPTY_SYM[]      = {0x0020, 0};
+char SNAKE_HEAD_SYM = '#';
+char SNAKE_BODY_SYM = '*';
 
 bool operator==(const Coordinates &lhs, const Coordinates &rhs)
 {
@@ -74,18 +73,18 @@ void Snake::step()
 void Snake::render()
 {
   if (this->dead_trail != NULLCRDS && !this->just_eaten)
-    mvaddwstr(this->dead_trail.y, this->dead_trail.x, EMPTY_SYM);
+    mvaddch(this->dead_trail.y, this->dead_trail.x, ' ');
 
   // rendering head.
   Coordinates snake_head = this->head;
-  mvaddwstr(snake_head.y, snake_head.x, SNAKE_HEAD_SYM);
+  mvaddch(snake_head.y, snake_head.x, SNAKE_HEAD_SYM);
 
   // replacing last of snake body (tail.first) with empty block, which helps
   // with not clearing and re-rendering the entire screen on every render.
   Node<Coordinates> *snake_tail;
   for (snake_tail = (this->tail).first(); snake_tail != nullptr;
        snake_tail = snake_tail->next) {
-    mvaddwstr(snake_tail->value.y, snake_tail->value.x, SNAKE_BODY_SYM);
+    mvaddch(snake_tail->value.y, snake_tail->value.x, SNAKE_BODY_SYM);
   }
 }
 

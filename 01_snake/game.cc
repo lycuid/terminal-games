@@ -21,7 +21,7 @@ static int PLAYER_DEATHS = 0;
 static int PLAYER_SCORE  = 0;
 static int PLAYER_SIZE   = 5;
 
-static wchar_t     FRUIT_SYM[]   = {0x2588, 0};
+static char       FRUIT_SYM      = '@';
 static const char *DEATH_BAR_FMT = "( Death: %03d )";
 static const char *SCORE_BAR_FMT = "( Score: %03d )";
 
@@ -188,7 +188,7 @@ void update_extras(Snake *snake, Coordinates *fruit)
   fruit->y = rand_range(1, WINDOW_HEIGHT - 1);
   fruit->x = rand_range(1, WINDOW_WIDTH - 1);
 
-  mvaddwstr(fruit->y, fruit->x, FRUIT_SYM);
+  mvaddch(fruit->y, fruit->x, FRUIT_SYM);
   mvprintw(0, WINDOW_WIDTH - PADDING_DEATH_BAR - PADDING_SCORE_BAR, SCORE_BAR_FMT,
            PLAYER_SCORE);
 }
