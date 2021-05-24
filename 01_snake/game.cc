@@ -1,3 +1,4 @@
+#include "configs.h"
 #include <clocale>
 #include <cmath>
 #include <cstring>
@@ -6,40 +7,28 @@
 #include <snake.h>
 #include <unistd.h>
 
-static const char *WINDOW_TITLE = "( EPIC SNAKE GAME )";
-static int         WINDOW_HEIGHT;
-static int         WINDOW_WIDTH;
+static int WINDOW_HEIGHT;
+static int WINDOW_WIDTH;
 
-static const char *SCOREBOARD_TITLE = "( SCOREBOARD )";
-static const char *SCOREBOARD_ECHO  = "  press 'q' to quit or 'r' to restart...  ";
-static int         SCOREBOARD_HEIGHT;
-static int         SCOREBOARD_WIDTH;
-static int         SCOREBOARD_Y;
-static int         SCOREBOARD_X;
-
-static int PLAYER_DEATHS = 0;
-static int PLAYER_SCORE  = 0;
-static int PLAYER_SIZE   = 5;
-
-static char       FRUIT_SYM      = '@';
-static const char *DEATH_BAR_FMT = "( Death: %03d )";
-static const char *SCORE_BAR_FMT = "( Score: %03d )";
+static int SCOREBOARD_HEIGHT;
+static int SCOREBOARD_WIDTH;
+static int SCOREBOARD_Y;
+static int SCOREBOARD_X;
 
 static int PADDING_DEATH_BAR = strlen(DEATH_BAR_FMT) + 2;
 static int PADDING_SCORE_BAR = strlen(SCORE_BAR_FMT) + 2;
 
-void init_window(); // initialize ncurses window.
+void init_window();
 void reset_window(const char *);
 void game_loop();
 bool scoreboard_and_restart(WINDOW *);
 
-void update_extras(Snake *, Coordinates *);
+void update_extras(Snake *, Point *);
 bool handle_keypress(Snake *, int);
 int  rand_range(int, int);
 
 int main(void)
 {
-  // setting up seed for generating pseudo-random value.
   srand(time(0));
   init_window();
 
@@ -102,7 +91,7 @@ void game_loop()
   snake.init(PLAYER_SIZE);
   reset_window(WINDOW_TITLE);
 
-  Coordinates fruit = Coordinates();
+  Point fruit = Point();
   update_extras(&snake, &fruit);
 
   while (handle_keypress(&snake, getch())) {
@@ -152,9 +141,9 @@ bool scoreboard_and_restart(WINDOW *scoreboard)
   int ch;
   while ((ch = getch()) != ERR) {
     switch (ch) {
-    case 'r': return true;
-    case 'q': return false;
-    default: break;
+      case 'r': return true;
+      case 'q': return false;
+      default: break;
     }
   }
 
@@ -165,30 +154,30 @@ bool scoreboard_and_restart(WINDOW *scoreboard)
 bool handle_keypress(Snake *snake, int ch)
 {
   switch (ch) {
-  case 'q': return false;
+    case 'q': return false;
 
-  case 'w':
-  case KEY_UP: snake->direction = Up; break;
-  case 'a':
-  case KEY_LEFT: snake->direction = Left; break;
-  case 's':
-  case KEY_DOWN: snake->direction = Down; break;
-  case 'd':
-  case KEY_RIGHT: snake->direction = Right; break;
-  case ERR:
-  default: break;
+    case 'w':
+    case KEY_UP: snake->direction = Up; break;
+    case 'a':
+    case KEY_LEFT: snake->direction = Left; break;
+    case 's':
+    case KEY_DOWN: snake->direction = Down; break;
+    case 'd':
+    case KEY_RIGHT: snake->direction = Right; break;
+    case ERR:
+    default: break;
   }
 
   return true;
 }
 
-void update_extras(Snake *snake, Coordinates *fruit)
+void update_extras(Snake *snake, Point *fruit)
 {
   // refreshing the fruit.
   fruit->y = rand_range(1, WINDOW_HEIGHT - 1);
   fruit->x = rand_range(1, WINDOW_WIDTH - 1);
 
   mvaddch(fruit->y, fruit->x, FRUIT_SYM);
-  mvprintw(0, WINDOW_WIDTH - PADDING_DEATH_BAR - PADDING_SCORE_BAR, SCORE_BAR_FMT,
-           PLAYER_SCORE);
+  mvprintw(0, WINDOW_WIDTH - PADDING_DEATH_BAR - PADDING_SCORE_BAR,
+           SCORE_BAR_FMT, PLAYER_SCORE);
 }

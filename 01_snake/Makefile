@@ -1,12 +1,12 @@
 BIN=./bin
 INCLUDE=./include
-GXX=g++ -Wall -I$(INCLUDE)
+CXXFLAGS=-Wall -I$(INCLUDE)
 
 build: includes.o
-	mkdir -p $(BIN) && $(GXX) -lncurses -o $(BIN)/game game.cc *.o
+	mkdir -p $(BIN) && $(CXX) $(CXXFLAGS) -lncurses -o $(BIN)/game game.cc *.o
 
 includes.o:
-	$(GXX) -c $(INCLUDE)/*.cc
+	$(CXX) $(CXXFLAGS) -c $(INCLUDE)/*.cc
 
 run: build
 	$(BIN)/game

@@ -8,20 +8,16 @@
  * [tail.first, ........, tail.last](head)
  */
 
-Coordinates::Coordinates() : x(-1), y(-1){};
-Coordinates::Coordinates(int x, int y) : x(x), y(y){};
+static const char SNAKE_HEAD_SYM = '#';
+static const char SNAKE_BODY_SYM = '#';
+static Point      nullpnt        = Point();
 
-char SNAKE_HEAD_SYM = '#';
-char SNAKE_BODY_SYM = '*';
-
-bool operator==(const Coordinates &lhs, const Coordinates &rhs)
+bool operator==(const Point &lhs, const Point &rhs)
 {
   return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
-bool operator!=(const Coordinates &lhs, const Coordinates &rhs) { return !(lhs == rhs); }
-
-Coordinates NULLCRDS = Coordinates();
+bool operator!=(const Point &lhs, const Point &rhs) { return !(lhs == rhs); }
 
 Snake::Snake() : direction(Right), just_eaten(false) {}
 Snake::Snake(direction_t d) : direction(d), just_eaten(false) {}
@@ -30,58 +26,59 @@ Snake::~Snake() {}
 void Snake::init(int length)
 {
   for (int i = 1; i < length + 1; ++i) {
-    Node<Coordinates> *n = (Node<Coordinates> *)malloc(sizeof(Coordinates));
-    n->value             = Coordinates(i, 1);
-    n->next              = nullptr;
+    Node *n  = (Node *)malloc(sizeof(Point));
+    n->value = Point(i, 1);
+    n->next  = nullptr;
 
     (this->tail).push_back(n);
   }
-  this->head       = Coordinates(length + 1, 1);
-  this->dead_trail = Coordinates();
+  this->head       = Point(length + 1, 1);
+  this->dead_trail = Point();
 }
 
 void Snake::step()
 {
-  Node<Coordinates> *stack_node;
+  Node *node;
 
   if (this->just_eaten) {
-    stack_node       = (Node<Coordinates> *)malloc(sizeof(Coordinates));
-    this->dead_trail = Coordinates();
+    node             = (Node *)malloc(sizeof(Point));
+    this->dead_trail = Point();
   } else {
     // pop from top, to reuse in the following steps.
-    stack_node = this->tail.pop();
-    // keeping track of the lost coordinates, in order to paint blank on next render.
-    this->dead_trail = stack_node->value;
+    node = this->tail.pop();
+    // keeping track of the lost coordinates, in order to paint blank on next
+    // render.
+    this->dead_trail = node->value;
   }
-  // stack the previously popped 'Node', at the bottom like a stacking a pencil.
-  // reusing the block, instead of creating/destroying.
-  stack_node->value = this->head;
-  stack_node->next  = nullptr;
+  // stack the previously popped 'Node', at the bottom like a stacking a
+  // pencil. reusing the block, instead of creating/destroying.
+  node->value = this->head;
+  node->next  = nullptr;
 
-  (this->tail).push_back(stack_node);
+  (this->tail).push_back(node);
 
   // updating head to new coordinates with respect to 'direction_t'.
   switch (this->direction) {
-  case Left: this->head.x--; break;
-  case Right: this->head.x++; break;
-  case Up: this->head.y--; break;
-  case Down: this->head.y++; break;
-  default: break;
+    case Left: this->head.x--; break;
+    case Right: this->head.x++; break;
+    case Up: this->head.y--; break;
+    case Down: this->head.y++; break;
+    default: break;
   }
 }
 
 void Snake::render()
 {
-  if (this->dead_trail != NULLCRDS && !this->just_eaten)
+  if (this->dead_trail != nullpnt && !this->just_eaten)
     mvaddch(this->dead_trail.y, this->dead_trail.x, ' ');
 
   // rendering head.
-  Coordinates snake_head = this->head;
+  Point snake_head = this->head;
   mvaddch(snake_head.y, snake_head.x, SNAKE_HEAD_SYM);
 
   // replacing last of snake body (tail.first) with empty block, which helps
   // with not clearing and re-rendering the entire screen on every render.
-  Node<Coordinates> *snake_tail;
+  Node *snake_tail;
   for (snake_tail = (this->tail).first(); snake_tail != nullptr;
        snake_tail = snake_tail->next) {
     mvaddch(snake_tail->value.y, snake_tail->value.x, SNAKE_BODY_SYM);
@@ -91,7 +88,7 @@ void Snake::render()
 bool Snake::is_dead(int height, int width)
 {
   // check self destruction.
-  Node<Coordinates> *snake_tail;
+  Node *snake_tail;
   for (snake_tail = this->tail.first(); snake_tail != nullptr;
        snake_tail = snake_tail->next) {
     if (this->head == snake_tail->value) return true;
@@ -102,7 +99,7 @@ bool Snake::is_dead(int height, int width)
            this->head.x < width);
 }
 
-bool Snake::eat_fruit(Coordinates *fruit)
+bool Snake::eat_fruit(Point *fruit)
 {
   return this->just_eaten = fruit != nullptr ? this->head == *fruit : false;
 }

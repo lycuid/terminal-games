@@ -5,16 +5,6 @@
 
 enum direction_t { Up, Down, Left, Right };
 
-struct Coordinates
-{
-  int x, y;
-  Coordinates();
-  Coordinates(int x, int y);
-};
-
-bool operator==(const Coordinates &, const Coordinates &);
-bool operator!=(const Coordinates &, const Coordinates &);
-
 class Snake
 {
 public:
@@ -23,19 +13,19 @@ public:
   ~Snake();
 
 public:
-  Coordinates             head;
-  LinkedList<Coordinates> tail;
-  direction_t             direction;
+  Point       head;
+  LinkedList  tail;
+  direction_t direction;
 
   void init(int);
   void step();
   void render();
-  bool eat_fruit(Coordinates *);
+  bool eat_fruit(Point *);
   bool is_dead(int, int);
 
 private:
-  Coordinates dead_trail;
-  bool        just_eaten;
+  Point dead_trail;
+  bool  just_eaten;
 };
 
 #endif

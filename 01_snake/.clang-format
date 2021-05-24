@@ -8,13 +8,6 @@ AllowShortLoopsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 SpacesBeforeTrailingComments: 1
-ColumnLimit: 90
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterClass: true
-  AfterFunction: true
-  AfterNamespace: true
-  AfterObjCDeclaration: true
-  AfterStruct: true
-  AfterUnion: true
-  AfterExternBlock: true
+ColumnLimit: 80
+BreakBeforeBraces: Linux
+IndentCaseLabels: true
