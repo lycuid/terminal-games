@@ -19,22 +19,18 @@ struct Node {
 
 class LinkedList
 {
-  Node *   _first;
-  Node *   _last;
-  unsigned _size;
-
 public:
+  Node *   first;
+  Node *   last;
+  unsigned size;
+
   LinkedList();
   LinkedList(Node *);
   ~LinkedList();
-
-  Node *   first();
-  Node *   last();
-  unsigned size();
 
   void  push_back(Node *);
   void  push_front(Node *);
   Node *pop();
 };
 
-#endif
+#endif // _LINKEDLIST_H

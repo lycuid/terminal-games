@@ -1,4 +1,3 @@
-#include "configs.h"
 #include <clocale>
 #include <cmath>
 #include <cstring>
@@ -7,25 +6,23 @@
 #include <snake.h>
 #include <unistd.h>
 
-static int WINDOW_HEIGHT;
-static int WINDOW_WIDTH;
+#include "configs.h"
+
+void init_window();
+void game_loop();
+bool scoreboard_and_restart(WINDOW *);
+void reset_window(WINDOW *);
+void update_window(WINDOW *, Point *);
+bool handle_keypress(Snake *, int);
+int  rand_range(int, int);
 
 static int SCOREBOARD_HEIGHT;
 static int SCOREBOARD_WIDTH;
 static int SCOREBOARD_Y;
 static int SCOREBOARD_X;
 
-static int PADDING_DEATH_BAR = strlen(DEATH_BAR_FMT) + 2;
-static int PADDING_SCORE_BAR = strlen(SCORE_BAR_FMT) + 2;
-
-void init_window();
-void reset_window(const char *);
-void game_loop();
-bool scoreboard_and_restart(WINDOW *);
-
-void update_extras(Snake *, Point *);
-bool handle_keypress(Snake *, int);
-int  rand_range(int, int);
+static const char *SCORE_BAR_FMT = "( Score: %03d )";
+static const char *DEATH_BAR_FMT = "( Death: %03d )";
 
 int main(void)
 {
@@ -59,8 +56,7 @@ void init_window()
   keypad(stdscr, true);
   // invisible cursor.
   curs_set(0);
-  // set WINDOW_HEIGHT and WINDOW_WIDTH.
-  getmaxyx(stdscr, WINDOW_HEIGHT, WINDOW_WIDTH);
+  refresh();
 
   SCOREBOARD_HEIGHT = 7;
   SCOREBOARD_WIDTH  = strlen(SCOREBOARD_ECHO) + 2;
@@ -68,19 +64,10 @@ void init_window()
   SCOREBOARD_Y      = (WINDOW_HEIGHT - SCOREBOARD_HEIGHT) / 2;
 }
 
-void reset_window(const char *title)
-{
-  clear();
-  box(stdscr, 0, 0);
-  mvprintw(0, 2, title);
-  mvprintw(0, WINDOW_WIDTH - PADDING_DEATH_BAR, DEATH_BAR_FMT, PLAYER_DEATHS);
-  refresh();
-}
-
-int rand_range(int min, int max) { return (rand() % (max - min)) + min; }
-
 void game_loop()
 {
+  WINDOW *canvas = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, 0, 0);
+
   // non blocking 'getch'.
   nodelay(stdscr, true);
 
@@ -89,18 +76,18 @@ void game_loop()
 
   Snake snake;
   snake.init(PLAYER_SIZE);
-  reset_window(WINDOW_TITLE);
+  reset_window(canvas);
 
   Point fruit = Point();
-  update_extras(&snake, &fruit);
+  update_window(canvas, &fruit);
 
   while (handle_keypress(&snake, getch())) {
     snake.step();
-    snake.render();
+    snake.render(canvas);
 
-    if (snake.eat_fruit(&fruit)) {
+    if (snake.ate_fruit(&fruit)) {
       PLAYER_SCORE += 10;
-      update_extras(&snake, &fruit);
+      update_window(canvas, &fruit);
     }
 
     if (snake.is_dead(WINDOW_HEIGHT - 1, WINDOW_WIDTH - 1)) {
@@ -108,17 +95,18 @@ void game_loop()
 
       snake = Snake();
       snake.init(PLAYER_SIZE);
-      reset_window(WINDOW_TITLE);
-
-      update_extras(&snake, &fruit);
+      reset_window(canvas);
+      update_window(canvas, &fruit);
 
       continue;
     }
 
     // updates screen.
-    refresh();
+    wrefresh(canvas);
     usleep((unsigned)(5 * pow(10, 4)));
   }
+
+  delwin(canvas);
 }
 
 bool scoreboard_and_restart(WINDOW *scoreboard)
@@ -133,7 +121,6 @@ bool scoreboard_and_restart(WINDOW *scoreboard)
   mvwaddstr(scoreboard, 0, (SCOREBOARD_WIDTH - 14) / 2, SCOREBOARD_TITLE);
   mvwprintw(scoreboard, 2, 4, "Score: %03d", PLAYER_SCORE);
   mvwprintw(scoreboard, 3, 4, "Death: %03d", PLAYER_DEATHS);
-
   wattron(scoreboard, A_STANDOUT);
   mvwaddstr(scoreboard, 5, 1, SCOREBOARD_ECHO);
   wrefresh(scoreboard);
@@ -171,13 +158,26 @@ bool handle_keypress(Snake *snake, int ch)
   return true;
 }
 
-void update_extras(Snake *snake, Point *fruit)
+// refresh fruit and scoreboard.
+void update_window(WINDOW *canvas, Point *fruit)
 {
   // refreshing the fruit.
   fruit->y = rand_range(1, WINDOW_HEIGHT - 1);
   fruit->x = rand_range(1, WINDOW_WIDTH - 1);
 
-  mvaddch(fruit->y, fruit->x, FRUIT_SYM);
-  mvprintw(0, WINDOW_WIDTH - PADDING_DEATH_BAR - PADDING_SCORE_BAR,
+  mvwaddch(canvas, fruit->y, fruit->x, FRUIT_SYM);
+  mvprintw(0, WINDOW_WIDTH - strlen(DEATH_BAR_FMT) - strlen(SCORE_BAR_FMT) - 2,
            SCORE_BAR_FMT, PLAYER_SCORE);
 }
+
+void reset_window(WINDOW *canvas)
+{
+  wclear(canvas);
+  box(canvas, 0, 0);
+  mvwprintw(canvas, 0, 2, WINDOW_TITLE);
+  mvwprintw(canvas, 0, WINDOW_WIDTH - strlen(DEATH_BAR_FMT) - 2, DEATH_BAR_FMT,
+            PLAYER_DEATHS);
+  wrefresh(canvas);
+}
+
+int rand_range(int min, int max) { return (rand() % (max - min)) + min; }

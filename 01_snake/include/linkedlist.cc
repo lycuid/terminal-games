@@ -3,36 +3,32 @@
 Point::Point() : x(-1), y(-1) {}
 Point::Point(int x, int y) : x(x), y(y) {}
 
-LinkedList::LinkedList() : _first(nullptr), _last(nullptr), _size(0) {}
-LinkedList::LinkedList(Node *n) : _first(n), _last(n), _size(1) {}
+LinkedList::LinkedList() : first(nullptr), last(nullptr), size(0) {}
+LinkedList::LinkedList(Node *n) : first(n), last(n), size(1) {}
 LinkedList::~LinkedList() {}
-
-Node *   LinkedList::first() { return this->_first; }
-Node *   LinkedList::last() { return this->_last; }
-unsigned LinkedList::size() { return this->_size; }
 
 void LinkedList::push_back(Node *node)
 {
-  if (this->_first == nullptr) this->_first = node;
-  if (this->_last != nullptr) this->_last->next = node;
+  if (this->first == nullptr) this->first = node;
+  if (this->last != nullptr) this->last->next = node;
 
-  this->_last = node;
-  this->_size++;
+  this->last = node;
+  this->size++;
 }
 
 void LinkedList::push_front(Node *node)
 {
-  if (this->_last == nullptr) this->_last = node;
-  if (this->_first != nullptr) node->next = this->_first;
+  if (this->last == nullptr) this->last = node;
+  if (this->first != nullptr) node->next = this->first;
 
-  this->_first = node;
-  this->_size++;
+  this->first = node;
+  this->size++;
 }
 
 Node *LinkedList::pop()
 {
-  Node *first = this->_first;
-  if (first != nullptr) this->_first = first->next;
-  this->_size--;
+  Node *first = this->first;
+  if (first != nullptr) this->first = first->next;
+  this->size--;
   return first;
 }

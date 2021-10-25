@@ -1,3 +1,4 @@
+#include <curses.h>
 #include <linkedlist.h>
 
 #ifndef _SNAKE_H
@@ -19,13 +20,13 @@ public:
 
   void init(int);
   void step();
-  void render();
-  bool eat_fruit(Point *);
+  void render(WINDOW *);
+  bool ate_fruit(const Point *);
   bool is_dead(int, int);
 
 private:
-  Point dead_trail;
-  bool  just_eaten;
+  Point trail;
+  bool  just_ate;
 };
 
-#endif
+#endif // _SNAKE_H
